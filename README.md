@@ -10,8 +10,7 @@ This tool helps engineers evaluate the safety of pipelines with corrosion defect
 
 ## Features
 
-- ✅ **ASME B31G 2012 Modified** calculations
-- ✅ **DNV RP F101** assessments  
+- ✅ **ASME B31G 2012 Modified and DNV RP F101** calculations
 - ✅ **Remaining life** estimation
 - ✅ **Interactive web interface**
 - ✅ **Real-time results**
@@ -33,6 +32,47 @@ python main.py
 3. **Open in browser**
 ```
 http://localhost:8080
+```
+
+## Usage Example
+
+1. Select assessment method (ASME or DNV)
+2. Enter pipeline parameters
+3. Input defect dimensions
+4. Click "Calculate"
+5. View results including safety factor and remaining life
+
+## User interface 
+Input data 
+
+<img width="1307" height="779" alt="image" src="https://github.com/user-attachments/assets/83f2dfde-68ff-4c51-93bd-24a802d01fd2" />
+
+Results 
+<img width="1303" height="687" alt="image" src="https://github.com/user-attachments/assets/8de9efef-5dbb-4f92-a1bf-e9e572bddb1f" />
+
+
+## Calculation Methods
+
+### ASME B31G Modified
+- Industry standard for corroded pipelines
+- Calculates Estimated Repair Factor (ERF)
+- ERF < 1.0 = Safe to operate
+- ERF ≥ 1.0 = Repair required
+
+### DNV RP F101  
+- Includes safety classes (Low, Medium, High)
+- Reliability-based approach
+- Material and design factors
+
+## Project Structure
+
+```
+pipeline-ffs/
+├── main.py          # Flask application
+├── app.yaml         # Google Cloud config
+├── requirements.txt # Python dependencies
+└── templates/
+    └── index.html   # Web interface
 ```
 
 ## Workflow
@@ -93,47 +133,6 @@ graph TD
     G --> G1
     I --> I1
     L --> L1
-```
-
-## Usage Example
-
-1. Select assessment method (ASME or DNV)
-2. Enter pipeline parameters
-3. Input defect dimensions
-4. Click "Calculate"
-5. View results including safety factor and remaining life
-
-## User interface 
-Input data 
-
-<img width="1307" height="779" alt="image" src="https://github.com/user-attachments/assets/83f2dfde-68ff-4c51-93bd-24a802d01fd2" />
-
-Results 
-<img width="1303" height="687" alt="image" src="https://github.com/user-attachments/assets/8de9efef-5dbb-4f92-a1bf-e9e572bddb1f" />
-
-
-## Calculation Methods
-
-### ASME B31G Modified
-- Industry standard for corroded pipelines
-- Calculates Estimated Repair Factor (ERF)
-- ERF < 1.0 = Safe to operate
-- ERF ≥ 1.0 = Repair required
-
-### DNV RP F101  
-- Includes safety classes (Low, Medium, High)
-- Reliability-based approach
-- Material and design factors
-
-## Project Structure
-
-```
-pipeline-ffs/
-├── main.py          # Flask application
-├── app.yaml         # Google Cloud config
-├── requirements.txt # Python dependencies
-└── templates/
-    └── index.html   # Web interface
 ```
 
 ## Deployment
