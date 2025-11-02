@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASME B31G 2012 Mod Calculator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .card { margin-bottom: 20px; }
+        .result-card { display: none; }
+        .loading { display: none; text-align: center; }
+        .parameter-table { font-size: 0.9rem; }
+        .disclaimer { font-size: 0.95rem; color: #555; line-height: 1.5; }
+        .disclaimer strong { color: #333; }
+        .life-result { background-color: #e8f4fd; border-left: 4px solid #0d6efd; }
+        .contact-info { font-size: 1.1rem; font-weight: 500; }
+        input[type="number"] { -moz-appearance: textfield; }
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button { 
+            -webkit-appearance: inner-spin-button !important;
+            opacity: 1; margin-left: 5px;
+        }
+        .method-row { align-items: center; }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h2 class="mb-0">🎯 Fitness-For-Service Assessment Tool for Corrosion Defects in Pipelines</h2>
+                        <small class="text-light">ASME B31G 2012 Mod & DNV RP F101 Calculator</small>
+                    </div>
+                    <div class="card-body">
+                        <!-- Data Input Form -->
+                        <form id="calculationForm">
+                            <!-- Method Selection Row -->
+                            <div class="row method-row mb-4">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Assessment Standard</label>
+                                        <select class="form-select" id="method" required>
+                                            <option value="asme">ASME B31G 2012 Modified</option>
+                                            <option value="dnv">DNV RP F101</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3" id="safetyClassGroup" style="display: none;">
+                                        <label class="form-label">Safety Class (DNV RP F101)</label>
+                                        <select class="form-select" id="safety_class">
+                                            <option value="low">Low</option>
+                                            <option value="medium" selected>Medium</option>
+                                            <option value="high">High</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h5>Parameters</h5>
+                                    <div class="mb-3">
+                                        <label class="form-label">Pipe Outer Diameter (mm)</label>
+                                        <input type="number" class="form-control" id="diameter" step="any" min="0" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Pipe Wall Thickness (mm)</label>
+                                        <input type="number" class="form-control" id="wall_thickness" step="any" min="0" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Maximum Allowable Operating Pressure (MPa)</label>
+                                        <input type="number" class="form-control" id="maop" step="any" min="0" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <h5>Material Properties</h5>
+                                    <div class="mb-3">
+                                        <label class="form-label">SMYS (MPa)</label>
+                                        <input type="number" class="form-control" id="smys" step="any" min="0" required>
+                                        <div class="form-text">Specified Minimum Yield Strength</div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">SMTS (MPa)</label>
+                                        <input type="number" class="form-control" id="smts" step="any" min="0" required>
+                                        <div class="form-text">Specified Minimum Tensile Strength</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h5>Corrosion Defect Parameters</h5>
+                                    <div class="mb-3">
+                                        <label class="form-label">Defect Length (mm)</label>
+                                        <input type="number" class="form-control" id="defect_length" step="any" min="0" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Defect Depth (mm)</label>
+                                        <input type="number" class="form-control" id="defect_depth" step="any" min="0" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Corrosion Rate (mm/year)</label>
+                                        <input type="number" class="form-control" id="corrosion_rate" step="any" min="0" value="0">
+                                        <div class="form-text">Optional: for remaining life calculation</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-success me-2">
+                                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
+                                        Calculate
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary" id="loadExample">
+                                        Load Example
+                                    </button>
+                                    <button type="reset" class="btn btn-outline-danger">Clear</button>
+                                </div>
+                            </div>
+                        </form>
+                        
+                        <!-- Loading Indicator -->
+                        <div class="loading mt-3" id="loading">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2">Performing calculation...</p>
+                        </div>
+                        
+                        <!-- Results Block -->
+                        <div class="card result-card mt-4" id="resultCard">
+                            <div class="card-header" id="resultHeader">
+                                <h4 class="mb-0">Calculation Results</h4>
+                                <span class="badge bg-secondary" id="methodBadge"></span>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6>Intermediate Parameters:</h6>
+                                        <table class="table table-sm parameter-table" id="parameterTable">
+                                            <!-- Parameters will be populated dynamically -->
+                                        </table>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6>Final Result:</h6>
+                                        <div class="alert" id="finalResult">
+                                            <h4 id="factorValue">-</h4>
+                                            <p id="repairMessage"></p>
+                                        </div>
+                                        <div class="mt-3">
+                                            <small class="text-muted" id="interpretationText">
+                                                <!-- Interpretation will be populated dynamically -->
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Remaining Life Results -->
+                                <div class="row mt-4" id="lifeResults" style="display: none;">
+                                    <div class="col-12">
+                                        <div class="card life-result">
+                                            <div class="card-header bg-info text-white">
+                                                <h6 class="mb-0">📅 Defect Remaining Life Analysis</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-md-3">
+                                                        <strong>Current Defect Depth:</strong><br>
+                                                        <span id="currentDepth">-</span> mm
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <strong>Remaining Corrosion Tolerance:</strong><br>
+                                                        <span id="remainingTolerance">-</span> mm
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <strong>Minimum Allowable Wall Thickness*:</strong><br>
+                                                        <span id="minCriticalDepth">-</span> mm
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <strong>Remaining Life:</strong><br>
+                                                        <span id="remainingLife">-</span> years
+                                                    </div>
+                                                </div>
+                                                <div class="row mt-3">
+                                                    <div class="col-12">
+                                                        <small class="text-muted">
+                                                            <strong>Note:</strong> Based on predicted corrosion rate of 
+                                                            <span id="usedCorrosionRate">-</span> mm/year. 
+                                                            *According to ASME B31G Modified, minimum allowable wall thickness cannot be less than 20% of original wall thickness 
+                                                            (<span id="wallThickness">-</span> mm × 20% = <span id="calculatedMinDepth">-</span> mm).
+                                                            Remaining life is the time until defect reaches minimum allowable wall thickness (ERF = 1.0).
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Contact Information -->
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">📧 Contact & Improvements</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="contact-info mb-0">
+                            For questions and improvement suggestions contact: 
+                            <strong>Eduard Ibragimov (ibragimov.e@outlook.com)</strong>
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Disclaimer -->
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">⚠️ Important Disclaimer</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="disclaimer">
+                            This tool is provided for educational and informational purposes only. 
+                            The calculations are based on ASME B31G-2012 Modified and DNV RP F101 methods. 
+                            No responsibility or liability is assumed for the accuracy, completeness, or reliability of the calculations. 
+                            Users must verify all results with qualified engineering professionals and use this tool at their own risk. 
+                            Never use this tool as the sole basis for pipeline integrity decisions.
+                        </p>
+                        <p class="disclaimer mb-0">
+                            <strong>Important:</strong> Always consult with certified pipeline engineers and follow applicable codes and standards for critical pipeline assessments.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle safety class selection based on method
+        document.getElementById('method').addEventListener('change', function() {
+            document.getElementById('safetyClassGroup').style.display = this.value === 'dnv' ? 'block' : 'none';
+        });
+
+        document.getElementById('calculationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            calculate();
+        });
+
+        document.getElementById('loadExample').addEventListener('click', function() {
+            // Set example values
+            document.getElementById('diameter').value = '506';
+            document.getElementById('wall_thickness').value = '6.35';
+            document.getElementById('defect_length').value = '200';
+            document.getElementById('defect_depth').value = '2.5';
+            document.getElementById('smys').value = '360';
+            document.getElementById('smts').value = '455';
+            document.getElementById('maop').value = '1.5';
+            document.getElementById('corrosion_rate').value = '0.1';
+            document.getElementById('method').value = 'asme';
+            document.getElementById('safety_class').value = 'medium';
+            document.getElementById('safetyClassGroup').style.display = 'none';
+        });
+
+        // Format number to show max 2 decimal places
+        function formatNumber(value) {
+            if (value === null || value === undefined) return '-';
+            const num = parseFloat(value);
+            if (isNaN(num)) return '-';
+            return num % 1 === 0 ? num.toString() : num.toFixed(2);
+        }
+
+        function calculate() {
+            const submitBtn = document.querySelector('button[type="submit"]');
+            const spinner = submitBtn.querySelector('.spinner-border');
+            const loading = document.getElementById('loading');
+            const resultCard = document.getElementById('resultCard');
+            const lifeResults = document.getElementById('lifeResults');
+
+            // Show loading
+            spinner.style.display = 'inline-block';
+            submitBtn.disabled = true;
+            loading.style.display = 'block';
+            resultCard.style.display = 'none';
+            lifeResults.style.display = 'none';
+
+            // Prepare form data
+            const formData = {
+                diameter: parseFloat(document.getElementById('diameter').value) || 0,
+                wall_thickness: parseFloat(document.getElementById('wall_thickness').value) || 0,
+                defect_length: parseFloat(document.getElementById('defect_length').value) || 0,
+                defect_depth: parseFloat(document.getElementById('defect_depth').value) || 0,
+                smys: parseFloat(document.getElementById('smys').value) || 0,
+                smts: parseFloat(document.getElementById('smts').value) || 0,
+                maop: parseFloat(document.getElementById('maop').value) || 0,
+                corrosion_rate: parseFloat(document.getElementById('corrosion_rate').value) || 0,
+                method: document.getElementById('method').value,
+                safety_class: document.getElementById('safety_class').value
+            };
+
+            // Validate inputs
+            for (const [key, value] of Object.entries(formData)) {
+                if (isNaN(value) && !['method', 'safety_class'].includes(key)) {
+                    alert(`Error: Please enter a valid number for ${key.replace('_', ' ')}`);
+                    resetUI();
+                    return;
+                }
+            }
+
+            // Send request
+            fetch('/calculate', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(handleResponse)
+            .catch(handleError)
+            .finally(resetUI);
+
+            function handleResponse(data) {
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
+
+                updateResults(data);
+            }
+
+            function handleError(error) {
+                alert('Connection error: ' + error);
+            }
+
+            function resetUI() {
+                spinner.style.display = 'none';
+                submitBtn.disabled = false;
+                loading.style.display = 'none';
+            }
+
+            function updateResults(data) {
+                // Update method badge
+                document.getElementById('methodBadge').textContent = data.method;
+                
+                // Update parameter table with formatted numbers
+                const paramTable = document.getElementById('parameterTable');
+                if (data.method === 'ASME B31G Modified') {
+                    paramTable.innerHTML = `
+                        <tr><td>Relative Depth (d/t):</td><td>${formatNumber(data.d_t)}</td></tr>
+                        <tr><td>Z Parameter:</td><td>${formatNumber(data.z_val)}</td></tr>
+                        <tr><td>Flow Stress (MPa):</td><td>${formatNumber(data.s_flow)}</td></tr>
+                        <tr><td>Folias Factor (M):</td><td>${formatNumber(data.m_val)}</td></tr>
+                        <tr><td>Failure Stress (MPa):</td><td>${formatNumber(data.stress_fail)}</td></tr>
+                        <tr><td>Failure Pressure (MPa):</td><td>${formatNumber(data.pressure_fail)}</td></tr>
+                    `;
+                    document.getElementById('factorValue').textContent = 'Estimated Repair Factor = ' + formatNumber(data.erf);
+                    document.getElementById('interpretationText').innerHTML = `
+                        <strong>Estimated Repair Factor Interpretation:</strong><br>
+                        • Estimated Repair Factor &lt; 1.0: Safe to operate<br>
+                        • Estimated Repair Factor ≥ 1.0: Immediate repair required
+                    `;
+                } else {
+                    paramTable.innerHTML = `
+                        <tr><td>Relative Depth (d/t):</td><td>${formatNumber(data.d_t)}</td></tr>
+                        <tr><td>Lambda Parameter:</td><td>${formatNumber(data.lambda_val)}</td></tr>
+                        <tr><td>Folias Factor (M):</td><td>${formatNumber(data.m_val)}</td></tr>
+                        <tr><td>Material Factor (γ<sub>m</sub>):</td><td>${formatNumber(data.gamma_m)}</td></tr>
+                        <tr><td>Design Factor (γ<sub>d</sub>):</td><td>${formatNumber(data.gamma_d)}</td></tr>
+                        <tr><td>Failure Pressure (MPa):</td><td>${formatNumber(data.pressure_fail)}</td></tr>
+                        <tr><td>Safety Class:</td><td>${data.safety_class.toUpperCase()}</td></tr>
+                    `;
+                    document.getElementById('factorValue').textContent = 'Estimated Repair Factor = ' + formatNumber(data.erf);
+                    document.getElementById('interpretationText').innerHTML = `
+                        <strong>Estimated Repair Factor Interpretation:</strong><br>
+                        • Estimated Repair Factor &lt; 1.0: Safe to operate<br>
+                        • Estimated Repair Factor ≥ 1.0: Immediate repair required<br>
+                        • Safety Class: ${data.safety_class.toUpperCase()}
+                    `;
+                }
+
+                // Update final result
+                const finalResult = document.getElementById('finalResult');
+                const resultHeader = document.getElementById('resultHeader');
+                
+                if (data.repair_required) {
+                    finalResult.className = 'alert alert-danger';
+                    document.getElementById('repairMessage').textContent = '❌ IMMEDIATE REPAIR REQUIRED';
+                    resultHeader.className = 'card-header bg-danger text-white';
+                } else {
+                    finalResult.className = 'alert alert-success';
+                    document.getElementById('repairMessage').textContent = '✅ Safe to operate - No repair required';
+                    resultHeader.className = 'card-header bg-success text-white';
+                }
+
+                // Show remaining life results
+                if (data.corrosion_rate > 0) {
+                    document.getElementById('currentDepth').textContent = formatNumber(data.original_depth);
+                    document.getElementById('remainingTolerance').textContent = formatNumber(data.remaining_corrosion_tolerance);
+                    document.getElementById('minCriticalDepth').textContent = formatNumber(data.min_critical_depth);
+                    document.getElementById('remainingLife').textContent = data.remaining_life;
+                    document.getElementById('usedCorrosionRate').textContent = formatNumber(data.corrosion_rate);
+                    document.getElementById('wallThickness').textContent = formatNumber(data.wall_thickness);
+                    document.getElementById('calculatedMinDepth').textContent = formatNumber(data.min_critical_depth);
+                    lifeResults.style.display = 'block';
+                }
+
+                resultCard.style.display = 'block';
+            }
+        }
+
+        // Input validation
+        document.querySelectorAll('input[type="number"]').forEach(input => {
+            input.addEventListener('blur', function() {
+                const value = this.value;
+                if (value === '' || value === '0') return;
+                
+                if (!isNaN(parseFloat(value)) && isFinite(value)) {
+                    this.classList.remove('is-invalid');
+                } else {
+                    this.classList.add('is-invalid');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
