@@ -10,7 +10,8 @@ This tool helps engineers evaluate the safety of pipelines with corrosion defect
 
 ## Features
 
-- ✅ **ASME B31G 2012 Modified and DNV RP F101** calculations
+- ✅ **ASME B31G 2012 Modified** calculations
+- ✅ **DNV RP F101** assessments  
 - ✅ **Remaining life** estimation
 - ✅ **Interactive web interface**
 - ✅ **Real-time results**
@@ -33,43 +34,6 @@ python main.py
 ```
 http://localhost:8080
 ```
-
-### Input Parameters
-
-**Pipeline Data:**
-- Outer Diameter (mm)
-- Wall Thickness (mm) 
-- Operating Pressure (MPa)
-
-**Material Properties:**
-- Yield Strength (SMYS)
-- Tensile Strength (SMTS)
-
-**Defect Information:**
-- Defect Length (mm)
-- Defect Depth (mm)
-- Corrosion Rate (mm/year)
-
-## Usage Example
-
-1. Select assessment method (ASME or DNV)
-2. Enter pipeline parameters
-3. Input defect dimensions
-4. Click "Calculate"
-5. View results including safety factor and remaining life
-
-## Calculation Methods
-
-### ASME B31G Modified
-- Industry standard for corroded pipelines
-- Calculates Estimated Repair Factor (ERF)
-- ERF < 1.0 = Safe to operate
-- ERF ≥ 1.0 = Repair required
-
-### DNV RP F101  
-- Includes safety classes (Low, Medium, High)
-- Reliability-based approach
-- Material and design factors
 
 ## Workflow
 
@@ -102,33 +66,28 @@ graph TD
     P --> C
     Q --> C
     R --> C
-    
-    subgraph "ASME B31G Modified Method"
-        G1[Calculate Relative Depth d/t] --> G2[Calculate Z Parameter]
-        G2 --> G3[Calculate Flow Stress]
-        G3 --> G4[Calculate Folias Factor M]
-        G4 --> G5[Calculate Failure Stress]
-        G5 --> G6[Calculate Failure Pressure]
-        G6 --> G7[Calculate ERF]
-    end
-    
-    subgraph "DNV RP F101 Method"
-        I1[Calculate Relative Depth d/t] --> I2[Calculate Lambda Parameter]
-        I2 --> I3[Calculate Folias Factor M]
-        I3 --> I4[Determine Safety Factors]
-        I4 --> I5[Calculate Failure Pressure]
-        I5 --> I6[Calculate Utilization/ERF]
-    end
-    
-    subgraph "Remaining Life Analysis"
-        L1[Find Critical Depth] --> L2[Calculate Corrosion Tolerance]
-        L2 --> L3[Calculate Remaining Life]
-        L3 --> L4[Display Life Analysis]
-    end
-    
-    G --> G1
-    I --> I1
-    L --> L1
+```
+
+## Usage Example
+
+1. Select assessment method (ASME or DNV)
+2. Enter pipeline parameters
+3. Input defect dimensions
+4. Click "Calculate"
+5. View results including safety factor and remaining life
+
+## Calculation Methods
+
+### ASME B31G Modified
+- Industry standard for corroded pipelines
+- Calculates Estimated Repair Factor (ERF)
+- ERF < 1.0 = Safe to operate
+- ERF ≥ 1.0 = Repair required
+
+### DNV RP F101  
+- Includes safety classes (Low, Medium, High)
+- Reliability-based approach
+- Material and design factors
 
 ## Project Structure
 
