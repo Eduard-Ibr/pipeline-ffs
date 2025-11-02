@@ -71,8 +71,9 @@ http://localhost:8080
 - Reliability-based approach
 - Material and design factors
 
-### Calculation flowchart 
+## Workflow
 
+```mermaid
 graph TD
     A[User Access Web Application] --> B[Load Interface]
     B --> C[Input Pipeline Parameters]
