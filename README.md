@@ -66,6 +66,33 @@ graph TD
     P --> C
     Q --> C
     R --> C
+    
+    subgraph "ASME B31G Modified Method"
+        G1[Calculate Relative Depth d/t] --> G2[Calculate Z Parameter]
+        G2 --> G3[Calculate Flow Stress]
+        G3 --> G4[Calculate Folias Factor M]
+        G4 --> G5[Calculate Failure Stress]
+        G5 --> G6[Calculate Failure Pressure]
+        G6 --> G7[Calculate ERF]
+    end
+    
+    subgraph "DNV RP F101 Method"
+        I1[Calculate Relative Depth d/t] --> I2[Calculate Lambda Parameter]
+        I2 --> I3[Calculate Folias Factor M]
+        I3 --> I4[Determine Safety Factors]
+        I4 --> I5[Calculate Failure Pressure]
+        I5 --> I6[Calculate Utilization/ERF]
+    end
+    
+    subgraph "Remaining Life Analysis"
+        L1[Find Critical Depth] --> L2[Calculate Corrosion Tolerance]
+        L2 --> L3[Calculate Remaining Life]
+        L3 --> L4[Display Life Analysis]
+    end
+    
+    G --> G1
+    I --> I1
+    L --> L1
 ```
 
 ## Usage Example
