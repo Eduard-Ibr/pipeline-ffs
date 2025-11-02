@@ -103,6 +103,15 @@ graph TD
 4. Click "Calculate"
 5. View results including safety factor and remaining life
 
+## User interface 
+Input data 
+
+<img width="1307" height="779" alt="image" src="https://github.com/user-attachments/assets/83f2dfde-68ff-4c51-93bd-24a802d01fd2" />
+
+Results 
+<img width="1303" height="687" alt="image" src="https://github.com/user-attachments/assets/8de9efef-5dbb-4f92-a1bf-e9e572bddb1f" />
+
+
 ## Calculation Methods
 
 ### ASME B31G Modified
